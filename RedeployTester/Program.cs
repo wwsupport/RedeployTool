@@ -34,6 +34,8 @@ namespace RedeployTester
             Console.Write("Please enter the number of loops you wish to run (Press return afterwards): ");
             loops = int.Parse(Console.ReadLine());
 
+
+            Console.WriteLine("Fetching all galaxies on {0}", nodeName);
             IGalaxies gals = grAccess.QueryGalaxies(nodeName);
 
             if (gals == null || grAccess.CommandResult.Successful == false)
@@ -41,7 +43,7 @@ namespace RedeployTester
                 Console.WriteLine(grAccess.CommandResult.CustomMessage + grAccess.CommandResult.Text);
                 return;
             }
-
+            
             IGalaxy galaxy = gals[galaxyName];
 
             if (galaxy == null)
@@ -49,7 +51,7 @@ namespace RedeployTester
                 Console.WriteLine("Failure, galaxy '{0}' does not exist", galaxyName);
                 return;
             }
-
+            Console.WriteLine("Attempting to log into galaxy {0}", galaxyName);
             galaxy.Login(galaxyUser, galaxyPass);
 
             cmd = galaxy.CommandResult;
