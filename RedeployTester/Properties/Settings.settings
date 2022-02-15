@@ -6,7 +6,7 @@
       <Value Profile="(Default)">1000</Value>
     </Setting>
     <Setting Name="objects" Type="System.String" Scope="User">
-      <Value Profile="(Default)">object1;object2</Value>
+      <Value Profile="(Default)">appengine1,1;appengine2,1;appengine3,1</Value>
     </Setting>
   </Settings>
 </SettingsFile>

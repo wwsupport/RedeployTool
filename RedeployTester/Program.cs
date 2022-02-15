@@ -13,7 +13,7 @@ namespace RedeployTester
         static void Main(string[] args)
         {
             int delayTime = Properties.Settings.Default.delay;
-            string[] objects = Properties.Settings.Default.objects.Split(';');
+            string[] configuredinstances = Properties.Settings.Default.objects.Split(';');
             GRAccessApp grAccess = new GRAccessAppClass();
             string galaxyName = "";
             string galaxyUser = "";
@@ -61,28 +61,66 @@ namespace RedeployTester
                 return;
             }
 
-            IgObjects queryObjects = galaxy.QueryObjectsByName(EgObjectIsTemplateOrInstance.gObjectIsInstance, ref objects);
+            IConditions conditions;
+            
+            conditions = galaxy.CreateConditionsObject();
 
-            cmd = galaxy.CommandResult;
+            conditions.Add(EConditionType.NameEquals, "bob", true);
 
-            if (!cmd.Successful)
+            conditions = null;
+
+
+            List<IInstance> instances = new List<IInstance>();
+            
+
+            foreach (var cinstance in configuredinstances)
             {
-                Console.WriteLine("Failed to find object(s) " + cmd.Text + " : " + cmd.CustomMessage); ;
-                return;
+
+                string[] specifics = cinstance.Split(',');
+                conditions = galaxy.CreateConditionsObject();
+
+                conditions.Add(EConditionType.NameEquals, specifics[0], true);
+                conditions.Add(EConditionType.NameSpaceIdIs, specifics[1], true);
+                IgObjects queryObjects = galaxy.QueryObjectsMultiCondition(EgObjectIsTemplateOrInstance.gObjectIsInstance, conditions);
+                cmd = galaxy.CommandResult;
+                if (!cmd.Successful)
+                {
+                    Console.WriteLine("Failed to find object(s) " + cmd.Text + " : " + cmd.CustomMessage); ;
+                    return;
+                }
+                foreach (IInstance item in queryObjects)
+                {
+                    instances.Add(item);
+                }
+                
+                conditions = null;
+
             }
+            
+
+            //IgObjects queryObjects = galaxy.QueryObjectsMultiCondition(EgObjectIsTemplateOrInstance.gObjectIsInstance, ref objects);
+            
+
+            //cmd = galaxy.CommandResult;
+
+            //if (!cmd.Successful)
+            //{
+            //    Console.WriteLine("Failed to find object(s) " + cmd.Text + " : " + cmd.CustomMessage); ;
+            //    return;
+            //}
 
 
             for (int i = 1; i <= loops; i++)
             {
                 Console.WriteLine("Loop {0}", i);
-                foreach (IInstance instance in queryObjects)
+                foreach (IInstance instance in instances)
                 {
                     Console.WriteLine("Deploying {0}", instance.Tagname);
                     instance.Deploy(EActionForCurrentlyDeployedObjects.skipDeploy, ESkipIfCurrentlyUndeployed.dontSkipIfCurrentlyUndeployed, EDeployOnScan.doDeployOnScan, EForceOffScan.doForceOffScan, ECascade.dontCascade);
                 }
                 Console.WriteLine("Waiting {0}ms", delayTime);
                 Thread.Sleep(delayTime);
-                foreach (IInstance instance in queryObjects)
+                foreach (IInstance instance in instances)
                 {
                     Console.WriteLine("Un-Deploying {0}", instance.Tagname);
                     instance.Undeploy(EForceOffScan.doForceOffScan, ECascade.dontCascade);

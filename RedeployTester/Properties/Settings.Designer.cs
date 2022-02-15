@@ -37,7 +37,7 @@ namespace RedeployTester.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("object1;object2")]
+        [global::System.Configuration.DefaultSettingValueAttribute("appengine1,1;appengine2,1;appengine3,1")]
         public string objects {
             get {
                 return ((string)(this["objects"]));
