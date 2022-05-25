@@ -18,6 +18,8 @@ namespace RedeployTester
             string galaxyName = "";
             string galaxyUser = "";
             string galaxyPass = "";
+            string cascade = "";
+            bool _cascade = false;
             int loops = 1;
 
             ICommandResult cmd;
@@ -33,6 +35,16 @@ namespace RedeployTester
             galaxyPass = Console.ReadLine();
             Console.Write("Please enter the number of loops you wish to run (Press return afterwards): ");
             loops = int.Parse(Console.ReadLine());
+            Console.Write("Would you like to cascade deploy objects? (Y/N)?: ");
+            cascade = Console.ReadLine();
+
+            if ((cascade == "Y") || (cascade == "y"))
+            {
+                _cascade = true;
+            }
+            else { 
+                _cascade = false;
+            }
 
 
             Console.WriteLine("Fetching all galaxies on {0}", nodeName);
@@ -116,14 +128,28 @@ namespace RedeployTester
                 foreach (IInstance instance in instances)
                 {
                     Console.WriteLine("Deploying {0}", instance.Tagname);
-                    instance.Deploy(EActionForCurrentlyDeployedObjects.skipDeploy, ESkipIfCurrentlyUndeployed.dontSkipIfCurrentlyUndeployed, EDeployOnScan.doDeployOnScan, EForceOffScan.doForceOffScan, ECascade.dontCascade);
+                    if (!_cascade)
+                    {
+                        instance.Deploy(EActionForCurrentlyDeployedObjects.skipDeploy, ESkipIfCurrentlyUndeployed.dontSkipIfCurrentlyUndeployed, EDeployOnScan.doDeployOnScan, EForceOffScan.doForceOffScan, ECascade.dontCascade);
+                    }
+                    else
+                    {
+                        instance.Deploy(EActionForCurrentlyDeployedObjects.skipDeploy, ESkipIfCurrentlyUndeployed.dontSkipIfCurrentlyUndeployed, EDeployOnScan.doDeployOnScan, EForceOffScan.doForceOffScan, ECascade.doCascade);
+                    }
                 }
                 Console.WriteLine("Waiting {0}ms", delayTime);
                 Thread.Sleep(delayTime);
                 foreach (IInstance instance in instances)
                 {
                     Console.WriteLine("Un-Deploying {0}", instance.Tagname);
-                    instance.Undeploy(EForceOffScan.doForceOffScan, ECascade.dontCascade);
+                    if (!_cascade)
+                    {
+                        instance.Undeploy(EForceOffScan.doForceOffScan, ECascade.doCascade);
+                    }
+                    else
+                    {
+                        instance.Undeploy(EForceOffScan.doForceOffScan, ECascade.doCascade);
+                    }
                 }
                 Thread.Sleep(delayTime);
                 Console.WriteLine("Waiting {0}ms", delayTime);
